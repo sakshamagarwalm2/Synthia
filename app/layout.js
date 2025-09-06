@@ -3,6 +3,7 @@ import "./globals.css";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AppSidebar from "./_components/AppSidebar";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Provider } from "./provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,16 +24,16 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <ClerkProvider>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <SidebarProvider>
-          <AppSidebar />
-          <SidebarTrigger />
-          {children}
-        </SidebarProvider>
-      </body>
-    </ClerkProvider>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          <SidebarProvider>
+            <AppSidebar />
+            <SidebarTrigger />
+            <Provider>{children}</Provider>
+          </SidebarProvider>
+        </body>
+      </ClerkProvider>
     </html>
   );
 }
