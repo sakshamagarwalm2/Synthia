@@ -2,10 +2,11 @@
 import { supabase } from "@/Services/supabase";
 import { useUser } from "@clerk/nextjs";
 import React, { useEffect, useState } from "react";
+import { UserDetailContext } from "../context/UserDetailContext"; // Import the context
 
 export function Provider({ children }) {
   const { user } = useUser();
-  const [userDetail,setUserDetail]=useState();
+  const [userDetail, setUserDetail] = useState();
 
   useEffect(() => {
     user && CreateNewUser();
@@ -13,7 +14,6 @@ export function Provider({ children }) {
 
   const CreateNewUser = async () => {
     // if user exist
-
     let { data: Users, error } = await supabase
       .from("Users")
       .select("*")
@@ -35,10 +35,10 @@ export function Provider({ children }) {
     }
     setUserDetail(Users[0]);
   };
-  return(
-    <UserDetailContext.Provider value={{userDetail,setUserDetail}}>
-        <div className="w-full h-full">{children}</div>
+
+  return (
+    <UserDetailContext.Provider value={{ userDetail, setUserDetail }}>
+      <div className="w-full h-full">{children}</div>
     </UserDetailContext.Provider>
   );
 }
-

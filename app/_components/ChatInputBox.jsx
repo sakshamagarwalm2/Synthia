@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import React from "react";
+import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  ArrowRight,
   Atom,
   AudioLines,
   Cpu,
@@ -22,9 +23,29 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { supabase } from "../../Services/supabase";
+
 import { AIModelsOption } from "@/Services/Shared";
+import { useUser } from "@clerk/nextjs";
 
 function ChatInputBox() {
+  const [userSearchInput, setUserSearchInput] = useState();
+  const [searchType, setSearchType] = useState("search");
+  const { user } = useUser();
+  const onSearchQuery = async () => {
+    const result = await supabase
+      .from("Librery")
+      .insert([
+        {
+          searchinput: userSearchInput,
+          userEmail: user?.primaryEmailAddress?.emailAddress,
+          type: searchType,
+        },
+      ])
+      .select();
+
+
+  };
   return (
     <div className="flex justify-center items-center w-full h-full flex-col">
       <div className="flex justify-evenly items-center">
@@ -38,6 +59,7 @@ function ChatInputBox() {
           <TabsContent value="account">
             <textarea
               placeholder="Ask Anything..."
+              onChange={(e) => setUserSearchInput(e.target.value)}
               className="w-full p-4 pr-32 outline-none resize-none min-h-[60px] max-h-[200px] overflow-y-auto"
               rows={1}
               onInput={(e) => {
@@ -50,6 +72,7 @@ function ChatInputBox() {
           <TabsContent value="password">
             <textarea
               placeholder="Research Anything..."
+              onChange={(e) => setUserSearchInput(e.target.value)}
               className="w-full p-4 pr-32 outline-none resize-none min-h-[60px] max-h-[200px] overflow-y-auto"
               rows={1}
               onInput={(e) => {
@@ -60,11 +83,19 @@ function ChatInputBox() {
             />
           </TabsContent>
           <TabsList>
-            <TabsTrigger value="account" className={"text-primary"}>
+            <TabsTrigger
+              value="account"
+              className={"text-primary"}
+              OnClick={() => setSearchType("search")}
+            >
               <Search />
               Search
             </TabsTrigger>
-            <TabsTrigger value="password" className={"text-primary"}>
+            <TabsTrigger
+              value="password"
+              className={"text-primary"}
+              OnClick={() => setSearchType("research")}
+            >
               <Atom />
               Research
             </TabsTrigger>
@@ -73,34 +104,63 @@ function ChatInputBox() {
         <div className="absolute right-4 bottom-3 flex gap-2 justify-center items-center">
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <Button variant={Ghost} className={'border border-transparent border-solid hover:border-amber-950 rounded-full'}>
+              <Button
+                variant={Ghost}
+                className={
+                  "border border-transparent border-solid hover:border-amber-950 rounded-full"
+                }
+              >
                 <Cpu className="text-gray-500 h-5 w-5 cursor-pointer hover:text-gray-700" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuLabel>Select Model</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              {AIModelsOption.map((model,index)=>(
+              {AIModelsOption.map((model, index) => (
                 <DropdownMenuItem key={index}>
-                    <div>
-                        <h2 className="mb-1 text-sm">{model.name}</h2>
-                        <p className="text-xs">{model.desc}</p>
-                    </div>
+                  <div>
+                    <h2 className="mb-1 text-sm">{model.name}</h2>
+                    <p className="text-xs">{model.desc}</p>
+                  </div>
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button variant={Ghost}  className={'border border-transparent border-solid hover:border-amber-950 rounded-full'}>
+          <Button
+            variant={Ghost}
+            className={
+              "border border-transparent border-solid hover:border-amber-950 rounded-full"
+            }
+          >
             <Globe className="text-gray-500 h-5 w-5 cursor-pointer hover:text-gray-700" />
           </Button>
-          <Button variant={Ghost} className={'border border-transparent border-solid hover:border-amber-950 rounded-full'}>
+          <Button
+            variant={Ghost}
+            className={
+              "border border-transparent border-solid hover:border-amber-950 rounded-full"
+            }
+          >
             <Paperclip className="text-gray-500 h-5 w-5 cursor-pointer hover:text-gray-700" />
           </Button>
-          <Button variant={Ghost} className={'border border-transparent border-solid hover:border-amber-950 rounded-full'}>
+          <Button
+            variant={Ghost}
+            className={
+              "border border-transparent border-solid hover:border-amber-950 rounded-full"
+            }
+          >
             <Mic className="text-gray-500 h-5 w-5 cursor-pointer hover:text-gray-700" />
           </Button>
-          <Button className={"rounded-full"}>
-            <AudioLines className="h-5 w-5 cursor-pointer" />
+          <Button
+            className={"rounded-full"}
+            onClick={() => {
+              userSearchInput ? onSearchQuery() : null;
+            }}
+          >
+            {!userSearchInput ? (
+              <AudioLines className="h-5 w-5 cursor-pointer" />
+            ) : (
+              <ArrowRight className="h-5 w-5 cursor-pointer" />
+            )}
           </Button>
         </div>
       </div>
