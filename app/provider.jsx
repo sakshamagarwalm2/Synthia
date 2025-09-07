@@ -1,5 +1,5 @@
 "use client";
-import { supabase } from "@/Services/supabase";
+import { supabase } from "../Services/supabase";
 import { useUser } from "@clerk/nextjs";
 import React, { useEffect, useState } from "react";
 import { UserDetailContext } from "../context/UserDetailContext"; // Import the context

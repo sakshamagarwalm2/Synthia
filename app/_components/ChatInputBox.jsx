@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import React, { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import {
   ArrowRight,
   Atom,
@@ -13,8 +13,9 @@ import {
   Mic,
   Paperclip,
   Search,
+  SendHorizonal,
+  Loader2, // Add this import for loading icon
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,17 +23,27 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "../../components/ui/dropdown-menu";
 import { supabase } from "../../Services/supabase";
 
-import { AIModelsOption } from "@/Services/Shared";
+import { AIModelsOption } from "../../Services/Shared";
 import { useUser } from "@clerk/nextjs";
+import { Button } from "../../components/ui/button";
+import { useRouter } from "next/navigation";
 
 function ChatInputBox() {
+  const libid = crypto.randomUUID();
+
   const [userSearchInput, setUserSearchInput] = useState();
   const [searchType, setSearchType] = useState("search");
   const { user } = useUser();
+
+  const [loading, setLoading] = useState(false);
+
+  const router=useRouter();
+
   const onSearchQuery = async () => {
+    setLoading(true);
     const result = await supabase
       .from("Librery")
       .insert([
@@ -40,12 +51,15 @@ function ChatInputBox() {
           searchinput: userSearchInput,
           userEmail: user?.primaryEmailAddress?.emailAddress,
           type: searchType,
+          libid: libid,
         },
       ])
       .select();
+    setLoading(false);
 
-
+    router.push(`/search/${libid}`);
   };
+
   return (
     <div className="flex justify-center items-center w-full h-full flex-col">
       <div className="flex justify-evenly items-center">
@@ -72,6 +86,7 @@ function ChatInputBox() {
           <TabsContent value="password">
             <textarea
               placeholder="Research Anything..."
+              value={userSearchInput || ""}
               onChange={(e) => setUserSearchInput(e.target.value)}
               className="w-full p-4 pr-32 outline-none resize-none min-h-[60px] max-h-[200px] overflow-y-auto"
               rows={1}
@@ -155,11 +170,15 @@ function ChatInputBox() {
             onClick={() => {
               userSearchInput ? onSearchQuery() : null;
             }}
-          >
-            {!userSearchInput ? (
+            disabled={loading} // Disable button while loading
+          > 
+            {/* Show loading icon when loading, otherwise show appropriate icon based on input */}
+            {loading ? (
+              <Loader2 className="h-5 w-5 cursor-pointer animate-spin" />
+            ) : !userSearchInput ? (
               <AudioLines className="h-5 w-5 cursor-pointer" />
             ) : (
-              <ArrowRight className="h-5 w-5 cursor-pointer" />
+              <SendHorizonal className="h-5 w-5 cursor-pointer"/>
             )}
           </Button>
         </div>

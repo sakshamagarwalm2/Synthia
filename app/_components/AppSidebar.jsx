@@ -10,11 +10,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar";
+} from "../../components/ui/sidebar";
 import Image from "next/image";
 import { Compass, GalleryHorizontalEnd, Search } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { Button } from "../../components/ui/button";
 import { 
   SignUpButton, 
   SignInButton, 
