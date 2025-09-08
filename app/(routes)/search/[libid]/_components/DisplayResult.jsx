@@ -7,12 +7,6 @@ import {
   LucideImage,
   LucideList,
   LucideSparkles,
-  SendHorizonal,
-  Loader2,
-  Search,
-  Atom,
-  Mic,
-  AudioLines,
 } from "lucide-react";
 import { supabase } from "../../../../../Services/supabase";
 import { useParams } from "next/navigation";
@@ -29,9 +23,6 @@ function DisplayResult({ searchInputRecord }) {
   const [searchResults, setSearchResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [userNewInput, setUserNewInput] = useState();
-  const [searchType, setSearchType] = useState("search");
-  const [chatLoading, setChatLoading] = useState(false);
   const libid = useParams().libid;
 
   useEffect(() => {
@@ -45,14 +36,13 @@ function DisplayResult({ searchInputRecord }) {
       GetSearchRecords();
     }
     setSearchResults(searchInputRecord);
-    console.log("Search input record:", searchInputRecord);
   }, [searchInputRecord, searchResults]);
 
   const GetSearchApiResult = async () => {
     setLoading(true);
     setError(null);
 
-    const input = (userNewInput ?? searchInputRecord?.searchinput)?.trim() ?? "";
+    const input = searchInputRecord?.searchinput?.trim() ?? "";
     if (!input) {
       setError("Search input cannot be empty");
       setLoading(false);
@@ -121,13 +111,14 @@ function DisplayResult({ searchInputRecord }) {
   const GenerateAIResp = async (formattedSearchResp, recordId) => {
     try {
       const result = await axios.post("/api/llm-model", {
-        userInput: searchInputRecord?.searchinput ?? "",
+        userInput: searchInputRecord?.searchinput,
         searchResult: formattedSearchResp,
         recordId: recordId,
       });
 
-      console.log("Full LLM model response:", result.data);
       const runId = result.data;
+
+      console.log("Inngest function triggered, runId:", runId,result);
       if (!runId || typeof runId !== "string") {
         console.error("Invalid runId received:", runId);
         await GetSearchRecords(); // Fallback
@@ -141,7 +132,7 @@ function DisplayResult({ searchInputRecord }) {
             runID: runId,
           });
 
-          console.log("Run status response:", runResp.data);
+          // console.log("Run status response:", runResp.data);
           if (runResp.data.data && runResp.data.data[0]?.status === "completed") {
             await GetSearchRecords();
             clearInterval(interval);
@@ -157,13 +148,7 @@ function DisplayResult({ searchInputRecord }) {
           await GetSearchRecords(); // Fallback on error
           clearInterval(interval);
         }
-      }, 2000);
-
-      setTimeout(async() => {
-        console.log("Polling timed out for runId:", runId);
-        await GetSearchRecords(); // Fallback on timeout
-        clearInterval(interval);
-      }, 15000);
+      }, 1000);
     } catch (error) {
       console.error("Error generating AI response:", {
         message: error.message,
@@ -184,46 +169,6 @@ function DisplayResult({ searchInputRecord }) {
       setSearchResults(Librery[0]);
     } catch (err) {
       console.error("Error fetching record:", err);
-    }
-  };
-
-  const handleNewChat = async () => {
-    if (!(userNewInput ?? "").trim()) return;
-
-    setChatLoading(true);
-    try {
-      const { data: newChat, error: chatError } = await supabase
-        .from("Chats")
-        .insert([
-          {
-            libid: libid,
-            userSearchInput: userNewInput ?? "",
-            searchType: searchType,
-            searchResult: [],
-            aiResp: null,
-          },
-        ])
-        .select();
-
-      if (chatError) throw chatError;
-
-      setUserNewInput("");
-      await GetSearchRecords();
-
-      if (newChat && newChat[0]) {
-        console.log("New chat submitted. You should now call your search API with:", userNewInput);
-      }
-    } catch (error) {
-      console.error("Error submitting new chat:", error.message);
-    } finally {
-      setChatLoading(false);
-    }
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleNewChat();
     }
   };
 
@@ -316,11 +261,11 @@ function DisplayResult({ searchInputRecord }) {
                 currentChat={chats}
               />
             )}
-            {activeTab === "Images" && (
+            {activeTab === "Images"?
               <div className="text-gray-500 py-8">
                 <ImageTabList mediaItems={mediaItems} />
-              </div>
-            )}
+              </div>: null
+              }
 
             {activeTab === "Sources" && (
               <div className="py-4">
@@ -332,7 +277,7 @@ function DisplayResult({ searchInputRecord }) {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-gray-500 py-8">No sources available</div>
+                  <div className="text-gray-500 py-8">Pls Reload</div>
                 )}
               </div>
             )}
@@ -341,75 +286,6 @@ function DisplayResult({ searchInputRecord }) {
         </div>
       ))}
       <hr className="my-20" />
-
-      <div className="fixed bottom-0 w-full p-4 z-50">
-        <div className="p-2 w-full max-w-2xl border rounded-2xl relative shadow-lg bg-white">
-          <Tabs defaultValue="search" className="w-full">
-            <TabsContent value="search">
-              <textarea
-                placeholder="Ask Anything..."
-                onChange={(e) => setUserNewInput(e.target.value)}
-                value={userNewInput ?? ""}
-                className="w-full p-4 pr-16 outline-none resize-none min-h-[60px] max-h-[200px] overflow-y-auto"
-                rows={1}
-                onInput={(e) => {
-                  e.target.style.height = "auto";
-                  e.target.style.height = Math.min(e.target.scrollHeight, 200) + "px";
-                }}
-                onKeyDown={handleKeyPress}
-              />
-            </TabsContent>
-            <TabsContent value="research">
-              <textarea
-                placeholder="Research Anything..."
-                onChange={(e) => setUserNewInput(e.target.value)}
-                value={userNewInput ?? ""}
-                className="w-full p-4 pr-16 outline-none resize-none min-h-[60px] max-h-[200px] overflow-y-auto"
-                rows={1}
-                onInput={(e) => {
-                  e.target.style.height = "auto";
-                  e.target.style.height = Math.min(e.target.scrollHeight, 200) + "px";
-                }}
-                onKeyDown={handleKeyPress}
-              />
-            </TabsContent>
-            <TabsList className="bottom-2 left-2">
-              <TabsTrigger
-                value="search"
-                onClick={() => setSearchType("search")}
-                className="flex items-center gap-1"
-              >
-                <Search className="w-4 h-4" />
-                Search
-              </TabsTrigger>
-              <TabsTrigger
-                value="research"
-                onClick={() => setSearchType("research")}
-                className="flex items-center gap-1"
-              >
-                <Atom className="w-4 h-4" />
-                Research
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-
-          <div className="absolute right-4 bottom-3">
-            <button
-              className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-white transition-colors disabled:bg-gray-400"
-              onClick={handleNewChat}
-              disabled={chatLoading || !(userNewInput ?? "").trim()}
-            >
-              {chatLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : !(userNewInput ?? "").trim() ? (
-                <Mic className="h-5 w-5" />
-              ) : (
-                <SendHorizonal className="h-5 w-5" />
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

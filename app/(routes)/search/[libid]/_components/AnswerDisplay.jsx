@@ -31,6 +31,7 @@ function AnswerDisplay({ results, searchInputRecord, currentChat }) {
                             dangerouslySetInnerHTML={{
                                 __html: chatToDisplay.aiResp
                                     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                                    .replace(/# (.*?)(\n|$)/g, '<h1 class="text-xl font-semibold mt-6 mb-3 text-gray-900">$1</h1>')
                                     .replace(/## (.*?)(\n|$)/g, '<h2 class="text-xl font-semibold mt-6 mb-3 text-gray-900">$1</h2>')
                                     .replace(/### (.*?)(\n|$)/g, '<h3 class="text-lg font-semibold mt-4 mb-2 text-gray-900">$1</h3>')
                                     .replace(/\* (.*?)(\n|$)/g, '<li class="ml-4 mb-1">$1</li>')

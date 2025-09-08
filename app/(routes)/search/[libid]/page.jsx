@@ -24,7 +24,6 @@ function SearchQueryResult() {
         .select("*,Chats(*)")
         .eq("libid", libid); // Now using the actual string value
 
-        console.log("Fetching record for libid:", Librery);
 
       if (error) {
         console.error("Supabase error:", error);
