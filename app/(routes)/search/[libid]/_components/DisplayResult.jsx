@@ -133,13 +133,25 @@ function DisplayResult({ searchInputRecord }) {
             runID: runId,
           });
 
-          // console.log("Run status response:", runResp.data);
-          if (runResp.data.data && runResp.data.data[0]?.status === "completed") {
+          // Check for aiResp existence in the database
+          const { data, error } = await supabase
+            .from("Chats")
+            .select("aiResp")
+            .eq("id", recordId)
+            .single();
+
+          if (error) {
+            console.error("Error fetching aiResp for recordId:", recordId, error);
+            // Continue polling if there's an error fetching the record
+          }
+
+          // Check if Inngest status is 'completed' OR if aiResp is not null
+          if ((runResp.data.data && runResp.data.data[0]?.status === "completed") || (data?.aiResp !== null)) {
             await GetSearchRecords();
             clearInterval(interval);
           }
         } catch (error) {
-          console.error("Error checking run status:", {
+          console.error("Error checking run status or aiResp:", {
             message: error.message,
             status: error.response?.status,
             data: error.response?.data,
@@ -203,9 +215,11 @@ function DisplayResult({ searchInputRecord }) {
     );
   }
 
-  const sourcesCount = searchInputRecord?.Chats?.[0]?.searchResult?.length || 0;
+  // Use searchResults?.Chats instead of searchInputRecord?.Chats for live data
+  const sourcesCount = searchResults?.Chats?.[0]?.searchResult?.length || 0;
 
-  const mostRecentSearchResult = searchInputRecord?.Chats?.[0]?.searchResult;
+  const mostRecentSearchResult = searchResults?.Chats?.[0]?.searchResult;
+  const currentChat = searchResults?.Chats?.[0] || {};
 
   const mediaItems = mostRecentSearchResult
     ?.map((item) => {
@@ -226,10 +240,10 @@ function DisplayResult({ searchInputRecord }) {
 
   return (
     <div className="mt-7 mb-24">
-      {searchResults?.Chats?.map((chats, index) => (
-        <div key={index}>
+      {searchResults?.Chats?.length > 0 && (
+        <div key={currentChat.id}>
           <h2 className="font-medium text-3xl line-clamp-2 mb-6">
-            {chats.userSearchInput}
+            {currentChat.userSearchInput}
           </h2>
           <div className="flex items-center space-x-6 border-b border-gray-200 pb-2">
             {dynamicTabs.map(({ label, icon: Icon, badge }) => (
@@ -257,35 +271,41 @@ function DisplayResult({ searchInputRecord }) {
           <div className="mt-6">
             {activeTab === "Answer" && (
               <AnswerDisplay
-                results={searchInputRecord}
-                searchInputRecord={searchInputRecord}
-                currentChat={chats}
+                results={searchResults}
+                searchInputRecord={searchResults}
+                currentChat={currentChat}
               />
             )}
-            {activeTab === "Images"?
+            {activeTab === "Images" && (
               <div className="text-gray-500 py-8">
                 <ImageTabList mediaItems={mediaItems} />
-              </div>: null
-              }
-
+              </div>
+            )}
             {activeTab === "Sources" && (
               <div className="py-4">
-                {searchInputRecord?.Chats && searchInputRecord.Chats.length > 0 ? (
-                  <div className="space-y-4">
-                    <h3 className="font-medium mb-4">Sources from Latest Search</h3>
-                    {searchInputRecord.Chats[0]?.searchResult?.map((source, index) => (
+                <div className="space-y-4">
+                  <h3 className="font-medium mb-4">Sources from Latest Search</h3>
+                  {mostRecentSearchResult?.length > 0 ? (
+                    mostRecentSearchResult.map((source, index) => (
                       <SourceCard key={index} source={source} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-gray-500 py-8">Pls Reload</div>
-                )}
+                    ))
+                  ) : (
+                    <div className="text-gray-500 py-8">No sources found.</div>
+                  )}
+                </div>
               </div>
             )}
           </div>
           <hr className="my-5 mb-4" />
         </div>
-      ))}
+      )}
+      {searchResults?.Chats?.length === 0 && (
+        <div className="mt-7">
+          <div className="flex items-center justify-center py-8">
+            <div className="text-gray-500">No chat records found.</div>
+          </div>
+        </div>
+      )}
       <hr className="my-20" />
     </div>
   );
