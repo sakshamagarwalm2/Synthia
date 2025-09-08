@@ -41,7 +41,7 @@ Search Results: ${JSON.stringify(event.data.searchResult, null, 2)}`,
         .eq("id", event.data.recordId)
         .select();
 
-      // console.log("Updated AI response:", data, error);
+      console.log("Updated AI response:", data, error);
       return data;
     });
 

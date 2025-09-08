@@ -3,7 +3,7 @@ import { NextResponse } from "next/server"; // Import NextResponse for consisten
 
 export async function POST(req) {
   const { runID } = await req.json();
-  // console.log("Fetching status for runID:", runID);
+  console.log("Fetching status for runID:", runID);
 
   try {
     const result = await axios.get(

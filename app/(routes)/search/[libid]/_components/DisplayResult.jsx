@@ -95,7 +95,7 @@ function DisplayResult({ searchInputRecord }) {
         throw new Error(error.message);
       }
 
-      console.log("Inserted search results:", data);
+      console.log("Inserted search results:", data ,"dataid:", data[0].id);
 
       if (data && data[0]) {
         await GenerateAIResp(formattedSearchResp, data[0].id);
@@ -117,6 +117,7 @@ function DisplayResult({ searchInputRecord }) {
       });
 
       const runId = result.data;
+      console.log("AI generation initiated, runId:", runId, result);
 
       console.log("Inngest function triggered, runId:", runId,result);
       if (!runId || typeof runId !== "string") {
