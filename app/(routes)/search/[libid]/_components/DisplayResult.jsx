@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import AnswerDisplay from "./AnswerDisplay";
 import ImageTabList from "./ImageTabList";
 import SourceCard from "./SourceCard";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../../components/ui/tabs";
 import {
   LucideImage,
   LucideList,
