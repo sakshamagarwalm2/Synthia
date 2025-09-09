@@ -27,12 +27,14 @@ export function Provider({ children }) {
             name: user?.fullName,
             email: user?.primaryEmailAddress.emailAddress,
           },
+
         ])
         .select();
 
       setUserDetail(data[0]);
       return;
     }
+    console.log(Users);
     setUserDetail(Users[0]);
   };
 

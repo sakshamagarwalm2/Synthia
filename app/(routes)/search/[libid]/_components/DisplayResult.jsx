@@ -2,13 +2,9 @@ import React, { useEffect, useState } from "react";
 import AnswerDisplay from "./AnswerDisplay";
 import ImageTabList from "./ImageTabList";
 import SourceCard from "./SourceCard";
-import {
-  LucideImage,
-  LucideList,
-  LucideSparkles,
-} from "lucide-react";
+import { LucideImage, LucideList, LucideSparkles } from "lucide-react";
 import { supabase } from "../../../../../Services/supabase";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 
 const tabs = [
@@ -24,6 +20,7 @@ function DisplayResult({ searchInputRecord }) {
   const [error, setError] = useState(null);
   const libid = useParams().libid;
 
+  const router = useRouter();
   useEffect(() => {
     if (!searchInputRecord || searchResults) {
       return;
@@ -62,7 +59,11 @@ function DisplayResult({ searchInputRecord }) {
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Server error response:", errorData);
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.message || "Unknown error"}`);
+        throw new Error(
+          `HTTP error! status: ${response.status}, message: ${
+            errorData.message || "Unknown error"
+          }`
+        );
       }
       const dataResult = await response.json();
       setSearchResults(dataResult);
@@ -94,7 +95,7 @@ function DisplayResult({ searchInputRecord }) {
         throw new Error(error.message);
       }
 
-      console.log("Inserted search results:", data ,"dataid:", data[0].id);
+      console.log("Inserted search results:", data, "dataid:", data[0].id);
 
       if (data && data[0]) {
         await GenerateAIResp(formattedSearchResp, data[0].id);
@@ -118,7 +119,7 @@ function DisplayResult({ searchInputRecord }) {
       const runId = result.data;
       console.log("AI generation initiated, runId:", runId, result);
 
-      console.log("Inngest function triggered, runId:", runId,result);
+      console.log("Inngest function triggered, runId:", runId, result);
       if (!runId || typeof runId !== "string") {
         console.error("Invalid runId received:", runId);
         await GetSearchRecords(); // Fallback
@@ -140,12 +141,20 @@ function DisplayResult({ searchInputRecord }) {
             .single();
 
           if (error) {
-            console.error("Error fetching aiResp for recordId:", recordId, error);
+            console.error(
+              "Error fetching aiResp for recordId:",
+              recordId,
+              error
+            );
             // Continue polling if there's an error fetching the record
           }
 
           // Check if Inngest status is 'completed' OR if aiResp is not null
-          if ((runResp.data.data && runResp.data.data[0]?.status === "completed") || (data?.aiResp !== null)) {
+          if (
+            (runResp.data.data &&
+              runResp.data.data[0]?.status === "completed") ||
+            data?.aiResp !== null
+          ) {
             await GetSearchRecords();
             clearInterval(interval);
           }
@@ -186,11 +195,15 @@ function DisplayResult({ searchInputRecord }) {
 
   if (loading) {
     return (
-      <div className="mt-7">
-        <div className="flex items-center justify-center py-8">
-          <div className="text-gray-500">Loading search results...</div>
+      // AI response wireframe skeleton
+        <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+          <div className="space-y-3 animate-pulse">
+            <div className="w-full h-4 bg-gray-200 rounded"></div>
+            <div className="w-5/6 h-4 bg-gray-200 rounded"></div>
+            <div className="w-2/3 h-4 bg-gray-200 rounded"></div>
+            <div className="w-3/4 h-4 bg-gray-200 rounded"></div>
+          </div>
         </div>
-      </div>
     );
   }
 
@@ -207,8 +220,20 @@ function DisplayResult({ searchInputRecord }) {
   if (!searchInputRecord) {
     return (
       <div className="mt-7">
-        <div className="flex items-center justify-center py-8">
-          <div className="text-gray-500">No search query found</div>
+        <div className="flex flex-col items-center justify-center py-8">
+          <div className="text-gray-500 mb-4 text-lg font-medium">
+            No search query found.
+          </div>
+          <p className="text-gray-400 mb-6 text-center max-w-sm">
+            Please enter a search term to find information on any topic you're
+            interested in.
+          </p>
+          <button
+            onClick={() => router.push("/")}
+            className="px-6 py-3 text-sm font-semibold text-white bg-primary rounded-full"
+          >
+            Start a New Search
+          </button>
         </div>
       </div>
     );
@@ -283,7 +308,9 @@ function DisplayResult({ searchInputRecord }) {
             {activeTab === "Sources" && (
               <div className="py-4">
                 <div className="space-y-4">
-                  <h3 className="font-medium mb-4">Sources from Latest Search</h3>
+                  <h3 className="font-medium mb-4">
+                    Sources from Latest Search
+                  </h3>
                   {mostRecentSearchResult?.length > 0 ? (
                     mostRecentSearchResult.map((source, index) => (
                       <SourceCard key={index} source={source} />
@@ -305,6 +332,12 @@ function DisplayResult({ searchInputRecord }) {
           </div>
         </div>
       )}
+      <button
+        onClick={() => router.push("/")}
+        className="px-6 py-3 text-sm font-semibold text-white bg-primary rounded-full"
+      >
+        Search for Something New
+      </button>
     </div>
   );
 }

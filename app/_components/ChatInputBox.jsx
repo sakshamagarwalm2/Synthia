@@ -2,37 +2,48 @@
 
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../../components/ui/tabs";
 import {
   Atom,
   AudioLines,
-  Cpu,
   Ghost,
   Mic,
   Search,
   SendHorizonal,
-  Loader2, // Add this import for loading icon
+  Loader2,
+  CreditCard,
 } from "lucide-react";
 import { supabase } from "../../Services/supabase";
 
-import { useUser } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs"; // useUser is crucial here
 import { Button } from "../../components/ui/button";
+import { useContext } from "react";
+import { UserDetailContext } from "../../context/UserDetailContext";
+import CreditPopup from "../../components/ui/CreditPopup";
 import { useRouter } from "next/navigation";
 
 function ChatInputBox() {
   const libid = crypto.randomUUID();
 
+  const { userDetail, setUserDetail } = useContext(UserDetailContext);
+  const [showCreditPopup, setShowCreditPopup] = useState(false);
+
   const [userSearchInput, setUserSearchInput] = useState();
   const [searchType, setSearchType] = useState("search");
-  const { user } = useUser();
+  const { user, isLoaded } = useUser(); // Get both user and isLoaded
 
   const [loading, setLoading] = useState(false);
 
   const [isRecording, setIsRecording] = useState(false);
   const recognitionRef = useRef(null);
-  const manuallyStoppedRef = useRef(false); // ✅ prevent auto-restart when clicked stop
+  const manuallyStoppedRef = useRef(false);
 
-  const router=useRouter();
+  const router = useRouter();
 
   // ---------------------- SPEECH RECOGNITION ----------------------
   useEffect(() => {
@@ -99,7 +110,7 @@ function ChatInputBox() {
 
     if (isRecording) {
       console.log("🛑 Stopping recognition...");
-      manuallyStoppedRef.current = true; // ✅ don’t restart after stop
+      manuallyStoppedRef.current = true;
       recognitionRef.current.stop();
       setIsRecording(false);
     } else {
@@ -110,27 +121,82 @@ function ChatInputBox() {
   };
   // ---------------------- END SPEECH RECOGNITION ----------------------
 
-
   const onSearchQuery = async () => {
-    setLoading(true);
-    const result = await supabase
-      .from("Librery")
-      .insert([
-        {
-          searchinput: userSearchInput,
-          userEmail: user?.primaryEmailAddress?.emailAddress,
-          type: searchType,
-          libid: libid,
-        },
-      ])
-      .select();
-    setLoading(false);
+    if (user && userDetail !== undefined) {
+      if (userDetail.credits < 1000) {
+        setShowCreditPopup(true);
+        return;
+      }
+    }
+    console.log("Search Input:", user);
 
-    router.push(`/search/${libid}`);
+    if (!userSearchInput) {
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      if (user) {
+        const { data: updatedUser, error: updateError } = await supabase
+          .from("Users")
+          .update({ credits: userDetail.credits - 1000 })
+          .eq("email", userDetail.email)
+          .select();
+
+        if (updateError) {
+          throw new Error("Failed to deduct credits.");
+        }
+
+        if (updatedUser && updatedUser[0]) {
+          setUserDetail(updatedUser[0]);
+        }
+
+      }
+        const { data: insertResult, error: insertError } = await supabase
+          .from("Librery")
+          .insert([
+            {
+              searchinput: userSearchInput,
+              userEmail: user?.primaryEmailAddress?.emailAddress,
+              type: searchType,
+              libid: libid,
+            },
+          ])
+          .select();
+
+        if (insertError) {
+          throw new Error("Failed to log search query.");
+        }
+      router.push(`/search/${libid}`);
+    } catch (error) {
+      console.error("Search query failed:", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBuyCredits = async () => {
+    const { data, error } = await supabase
+      .from("Users")
+      .update({ credits: userDetail.credits + 10000 })
+      .eq("email", userDetail.email)
+      .select();
+
+    if (!error && data[0]) {
+      setUserDetail(data[0]);
+    }
+    setShowCreditPopup(false);
   };
 
   return (
     <div className="flex justify-center items-center w-full h-full flex-col">
+      {showCreditPopup && (
+        <CreditPopup
+          onClose={() => setShowCreditPopup(false)}
+          onBuy={handleBuyCredits}
+        />
+      )}
       <div className="flex justify-evenly items-center">
         <Image src={"/Synthialogo.png"} alt="logo" width={100} height={50} />
         <h1 className="font-black font-stretch-75% text-5xl michroma-text!important">
@@ -162,7 +228,9 @@ function ChatInputBox() {
 
           <TabsContent value="password">
             <textarea
-              placeholder={isRecording ? "Listening..." : "Research Anything..."}
+              placeholder={
+                isRecording ? "Listening..." : "Research Anything..."
+              }
               value={userSearchInput}
               onChange={(e) => setUserSearchInput(e.target.value)}
               className="w-full p-4 pr-32 outline-none resize-none min-h-[60px] max-h-[200px] overflow-y-auto"
@@ -202,6 +270,12 @@ function ChatInputBox() {
           </TabsList>
         </Tabs>
         <div className="absolute right-4 bottom-3 flex gap-2 justify-center items-center">
+          {isLoaded && user && (
+            <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-full text-sm font-semibold text-gray-800">
+              <CreditCard className="h-4 w-4 text-primary" />
+              <span className="text-xs">{userDetail?.credits || 0}</span>
+            </div>
+          )}
           {/* 🎤 MIC BUTTON with animation */}
           <Button
             variant={Ghost}
@@ -214,7 +288,9 @@ function ChatInputBox() {
           >
             <Mic
               className={`h-5 w-5 cursor-pointer transition-colors ${
-                isRecording ? "text-red-600" : "text-gray-500 hover:text-gray-700"
+                isRecording
+                  ? "text-red-600"
+                  : "text-gray-500 hover:text-gray-700"
               }`}
             />
           </Button>

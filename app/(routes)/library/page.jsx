@@ -7,6 +7,7 @@ import { LibraryBig, Trash2 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Loader2 } from "lucide-react";
 
+
 function Librery() {
   const { user } = useUser();
   const router = useRouter();
@@ -84,6 +85,12 @@ function Librery() {
         <h2 className="line-clamp-1 max-w-md">
           Library
         </h2>
+        <button
+        onClick={() => router.push("/")}
+        className="px-6 py-3 text-sm font-semibold text-white bg-primary rounded-full"
+      >
+        Search for Something New
+      </button>
         
       </div>
       <h1 className="mt-20 text-3xl font-bold mb-10 flex flex-row gap-4 items-center"><LibraryBig/> Library Page</h1>
@@ -92,6 +99,7 @@ function Librery() {
         <div className="flex justify-center items-center h-40">
           <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
         </div>
+
       ) : history.length > 0 ? (
         <div className="space-y-4">
           {history.map((record) => (

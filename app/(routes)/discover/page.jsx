@@ -65,6 +65,12 @@ function Discover() {
           <UserButton />
         </div>
         <h2 className="line-clamp-1 max-w-md">Discover</h2>
+        <button
+        onClick={() => router.push("/")}
+        className="px-6 py-3 text-sm font-semibold text-white bg-primary rounded-full"
+      >
+        Search for Something New
+      </button>
       </div>
       <h1 className="mt-20 text-3xl font-bold mb-10 flex flex-row gap-4 items-center">
         <Globe /> Discover Page
