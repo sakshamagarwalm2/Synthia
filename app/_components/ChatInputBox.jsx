@@ -99,7 +99,7 @@ function ChatInputBox() {
 
   const handleMicClick = () => {
     if (!recognitionRef.current) {
-      alert("Speech recognition not supported. Try Chrome or Edge.");
+      alert("Speech recognition not supported. Try Another Browser");
       return;
     }
 

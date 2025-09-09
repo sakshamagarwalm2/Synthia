@@ -1,16 +1,44 @@
-export const AIModelsOption=[
-    {
-        id:1,
-        name:'Sonar',
-        desc:'Perplexisty Fast Model',
-        modelAPI:''
-    },
-    {
-        id:2,
-        name:'Claude 3.7',
-        desc:'Smart model by Anthropic',
-        modelAPI:''
-    },
+export const AIModelsOption = [
+  {
+    id: 1,
+    name: "Gemini 1.5 Flash",
+    desc: "A fast, cost-effective multimodal model by Google.",
+    modelAPI: "gemini-1.5-flash",
+    provider: "google",
+    requiresKey: false, // Your key is on the backend
+  },
+  {
+    id: 2,
+    name: "Claude Sonnet 4",
+    desc: "A smart model by Anthropic. (Paid via OpenRouter)",
+    modelAPI: "anthropic/claude-sonnet-4",
+    provider: "openrouter",
+    requiresKey: true,
+  },
+  {
+    id: 3,
+    name: "GPT-4o",
+    desc: "OpenAI's latest flagship model. (Paid via OpenRouter)",
+    modelAPI: "openai/gpt-4o",
+    provider: "openrouter",
+    requiresKey: true,
+  },
+  {
+    id: 4,
+    name: "DeepSeek-V3.1 (Free)",
+    desc: "A high-reasoning free model.",
+    modelAPI: "deepseek/deepseek-chat-v3.1:free",
+    provider: "openrouter",
+    requiresKey: false, // Free model, no key needed
+  },
+  {
+    id: 5,
+    name: "Grok 1",
+    desc: "A model by xAI. (Paid via OpenRouter)",
+    modelAPI: "x-ai/grok-1",
+    provider: "openrouter",
+    requiresKey: true,
+  },
 ];
 
 export const SearchResult={
