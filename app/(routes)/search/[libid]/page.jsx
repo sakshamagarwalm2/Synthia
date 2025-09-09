@@ -44,7 +44,7 @@ function SearchQueryResult() {
   return (
     <div>
       <Header searchInputRecord={searchInputRecord} />
-      <div className="px-10 md:px-20 lg:px-50 mt-20">
+      <div className="px-1 md:px-20 lg:px-50 mt-20 overflow-y-hidden">
         <DisplayResult searchInputRecord={searchInputRecord} />
       </div>
     </div>

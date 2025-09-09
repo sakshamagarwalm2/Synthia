@@ -196,7 +196,7 @@ function DisplayResult({ searchInputRecord }) {
   if (loading) {
     return (
       // AI response wireframe skeleton
-        <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+        <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg ">
           <div className="space-y-3 animate-pulse">
             <div className="w-full h-4 bg-gray-200 rounded"></div>
             <div className="w-5/6 h-4 bg-gray-200 rounded"></div>

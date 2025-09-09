@@ -33,7 +33,7 @@ export default function RootLayout({ children }) {
         >
           <SidebarProvider>
             <AppSidebar />
-            <SidebarTrigger />
+            <SidebarTrigger/>
             <Provider>{children}</Provider>
           </SidebarProvider>
         </body>

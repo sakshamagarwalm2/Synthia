@@ -71,7 +71,6 @@ function ChatInputBox() {
       recognition.continuous = true;
 
       recognition.onstart = () => {
-        console.log("🎤 Started listening...");
         setIsRecording(true);
         manuallyStoppedRef.current = false;
       };
@@ -81,29 +80,22 @@ function ChatInputBox() {
         for (let i = event.resultIndex; i < event.results.length; i++) {
           transcript += event.results[i][0].transcript;
         }
-        console.log("📝 Transcript:", transcript);
         setUserSearchInput(transcript);
       };
 
-      recognition.onerror = (event) => {
-        console.error("❌ Speech recognition error:", event.error);
+      recognition.onerror = () => {
         setIsRecording(false);
       };
 
       recognition.onend = () => {
-        console.log("⏹️ Recognition ended");
         if (!manuallyStoppedRef.current) {
-          console.log("🔁 Auto-restarting...");
           recognition.start();
         } else {
-          console.log("🛑 Stopped by user");
           setIsRecording(false);
         }
       };
 
       recognitionRef.current = recognition;
-    } else {
-      console.warn("⚠️ SpeechRecognition API not supported in this browser.");
     }
 
     return () => {
@@ -114,18 +106,13 @@ function ChatInputBox() {
   }, []);
 
   const handleMicClick = () => {
-    if (!recognitionRef.current) {
-      alert("Speech recognition not supported. Try Another Browser");
-      return;
-    }
+    if (!recognitionRef.current) return;
 
     if (isRecording) {
-      console.log("🛑 Stopping recognition...");
       manuallyStoppedRef.current = true;
       recognitionRef.current.stop();
       setIsRecording(false);
     } else {
-      console.log("▶️ Starting recognition...");
       manuallyStoppedRef.current = false;
       recognitionRef.current.start();
     }
@@ -133,14 +120,10 @@ function ChatInputBox() {
   // ---------------------- END SPEECH RECOGNITION ----------------------
 
   const onSearchQuery = async () => {
-
-    // Guest limit check
     if (!user && hasSearched) {
-      console.log("Guest user has already searched once.");
       router.push('/sign-in');
       return;
     }
-
 
     if (user && userDetail !== undefined) {
       if (userDetail.credits < 1000) {
@@ -148,7 +131,6 @@ function ChatInputBox() {
         return;
       }
     }
-    // console.log("Search Input:", user);
 
     if (!userSearchInput) {
       return;
@@ -164,40 +146,30 @@ function ChatInputBox() {
           .eq("email", userDetail.email)
           .select();
 
-        if (updateError) {
-          throw new Error("Failed to deduct credits.");
-        }
+        if (updateError) throw new Error("Failed to deduct credits.");
 
-        if (updatedUser && updatedUser[0]) {
-          setUserDetail(updatedUser[0]);
-        }
-
+        if (updatedUser && updatedUser[0]) setUserDetail(updatedUser[0]);
       }
-        const { data: insertResult, error: insertError } = await supabase
-          .from("Librery")
-          .insert([
-            {
-              searchinput: userSearchInput,
-              userEmail: user?.primaryEmailAddress?.emailAddress,
-              type: searchType,
-              libid: libid,
-            },
-          ])
-          .select();
 
-        if (insertError) {
-          throw new Error("Failed to log search query.");
-        }
+      const { error: insertError } = await supabase
+        .from("Librery")
+        .insert([
+          {
+            searchinput: userSearchInput,
+            userEmail: user?.primaryEmailAddress?.emailAddress,
+            type: searchType,
+            libid: libid,
+          },
+        ]);
 
-        // Set hasSearched for guests after successful search
+      if (insertError) throw new Error("Failed to log search query.");
+
       if (!user) {
         localStorage.setItem('hasSearched', 'true');
         setHasSearched(true);
-        console.log("Set hasSearched to true for guest user");
       }
 
       router.push(`/search/${libid}`);
-      
     } catch (error) {
       console.error("Search query failed:", error.message);
     } finally {
@@ -212,34 +184,44 @@ function ChatInputBox() {
       .eq("email", userDetail.email)
       .select();
 
-    if (!error && data[0]) {
-      setUserDetail(data[0]);
-    }
+    if (!error && data[0]) setUserDetail(data[0]);
     setShowCreditPopup(false);
   };
 
   return (
-    <div className="flex justify-center items-center w-full h-full flex-col">
+    <div className="flex flex-col justify-center items-center w-full h-full px-4 sm:px-6 md:px-10">
       {showCreditPopup && (
         <CreditPopup
           onClose={() => setShowCreditPopup(false)}
           onBuy={handleBuyCredits}
         />
       )}
-      <div className="flex justify-evenly items-center">
-        <Image src={"/Synthialogo.png"} alt="logo" width={100} height={50} />
-        <h1 className="font-black font-stretch-75% text-5xl michroma-text!important">
+
+      {/* Logo + Title */}
+      <div className="flex justify-center items-center gap-2 sm:gap-4 w-full">
+        <Image src={"/Synthialogo.png"} alt="logo" width={80} height={40} className="sm:w-[100px] sm:h-[50px]" />
+        <h1 className="font-black text-3xl sm:text-5xl text-center sm:text-left michroma-text!important">
           SYNTHIA
         </h1>
       </div>
-      <div className="p-2 w-full max-w-2xl border rounded-2xl relative mt-10">
+
+      {/* Credits */}
+      {isLoaded && user && (
+        <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-full text-sm font-semibold text-gray-800 mt-2 sm:mt-3">
+          <CreditCard className="h-4 w-4 text-primary" />
+          <span className="text-xs sm:text-sm">{userDetail?.credits || 0}</span>
+        </div>
+      )}
+
+      {/* Input Area */}
+      <div className="p-2 w-full max-w-full sm:max-w-2xl border rounded-2xl relative mt-5 sm:mt-7">
         <Tabs defaultValue="account" className="w-full">
           <TabsContent value="account">
             <textarea
               placeholder={isRecording ? "Listening..." : "Ask Anything..."}
               value={userSearchInput}
               onChange={(e) => setUserSearchInput(e.target.value)}
-              className="w-full p-4 pr-32 outline-none resize-none min-h-[60px] max-h-[200px] overflow-y-auto"
+              className="w-full p-3 sm:p-4 pr-20 sm:pr-32 outline-none resize-none min-h-[60px] max-h-[200px] overflow-y-auto text-sm sm:text-base"
               rows={1}
               onInput={(e) => {
                 e.target.style.height = "auto";
@@ -262,7 +244,7 @@ function ChatInputBox() {
               }
               value={userSearchInput}
               onChange={(e) => setUserSearchInput(e.target.value)}
-              className="w-full p-4 pr-32 outline-none resize-none min-h-[60px] max-h-[200px] overflow-y-auto"
+              className="w-full p-3 sm:p-4 pr-20 sm:pr-32 outline-none resize-none min-h-[60px] max-h-[200px] overflow-y-auto text-sm sm:text-base"
               rows={1}
               onInput={(e) => {
                 e.target.style.height = "auto";
@@ -278,45 +260,40 @@ function ChatInputBox() {
             />
           </TabsContent>
 
-          <TabsList>
+          <TabsList className="flex flex-wrap gap-2 sm:gap-4 mt-2">
             <TabsTrigger
               value="account"
-              className={"text-primary"}
+              className={"text-primary flex items-center gap-1 text-sm sm:text-base"}
               onClick={() => setSearchType("search")}
             >
-              <Search />
+              <Search className="h-4 w-4 sm:h-5 sm:w-5" />
               Search
             </TabsTrigger>
 
             <TabsTrigger
               value="password"
-              className={"text-primary"}
-              OnClick={() => setSearchType("research")}
+              className={"text-primary flex items-center gap-1 text-sm sm:text-base"}
+              onClick={() => setSearchType("research")}
             >
-              <Atom />
+              <Atom className="h-4 w-4 sm:h-5 sm:w-5" />
               Research
             </TabsTrigger>
           </TabsList>
         </Tabs>
-        <div className="absolute right-4 bottom-3 flex gap-2 justify-center items-center">
-          {isLoaded && user && (
-            <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-full text-sm font-semibold text-gray-800">
-              <CreditCard className="h-4 w-4 text-primary" />
-              <span className="text-xs">{userDetail?.credits || 0}</span>
-            </div>
-          )}
-          {/* 🎤 MIC BUTTON with animation */}
+
+        {/* Buttons */}
+        <div className="absolute right-3 sm:right-4 bottom-2 sm:bottom-3 flex gap-1 sm:gap-2 justify-center items-center">
           <Button
             variant={Ghost}
             onClick={handleMicClick}
-            className={`border border-transparent border-solid rounded-full transition-all duration-300 ${
+            className={`border border-transparent border-solid rounded-full transition-all duration-300 p-1 sm:p-2 ${
               isRecording
                 ? "bg-red-100 animate-pulse border-red-500 shadow-lg shadow-red-300"
                 : "hover:border-amber-950"
             }`}
           >
             <Mic
-              className={`h-5 w-5 cursor-pointer transition-colors ${
+              className={`h-4 w-4 sm:h-5 sm:w-5 cursor-pointer transition-colors ${
                 isRecording
                   ? "text-red-600"
                   : "text-gray-500 hover:text-gray-700"
@@ -324,20 +301,19 @@ function ChatInputBox() {
             />
           </Button>
 
-          {/* SEND BUTTON */}
           <Button
-            className={"rounded-full"}
+            className={"rounded-full p-1 sm:p-2"}
             onClick={() => {
               userSearchInput ? onSearchQuery() : null;
             }}
             disabled={loading}
           >
             {loading ? (
-              <Loader2 className="h-5 w-5 cursor-pointer animate-spin" />
+              <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 cursor-pointer animate-spin" />
             ) : !userSearchInput ? (
-              <AudioLines className="h-5 w-5 cursor-pointer" />
+              <AudioLines className="h-4 w-4 sm:h-5 sm:w-5 cursor-pointer" />
             ) : (
-              <SendHorizonal className="h-5 w-5 cursor-pointer" />
+              <SendHorizonal className="h-4 w-4 sm:h-5 sm:w-5 cursor-pointer" />
             )}
           </Button>
         </div>

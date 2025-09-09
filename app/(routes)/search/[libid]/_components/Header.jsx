@@ -24,7 +24,7 @@ function Header({ searchInputRecord }) {
       {/* Left side: User info, time, and CREDITS */}
       <div className="flex items-center gap-4">
         <UserButton />
-        <div className="flex gap-1 justify-center items-center">
+        <div className="hidden md:flex gap-1 justify-center items-center">
           <Clock className="h-5 w-5 text-gray-500" />
           <h2 className="text-sm text-gray-700">{moment(searchInputRecord?.created_at).fromNow()}</h2>
         </div>
@@ -45,7 +45,7 @@ function Header({ searchInputRecord }) {
       {/* Right side: Copy link button */}
       <div className="flex gap-3 items-center relative">
         <Button onClick={handleCopyLink}>
-          <Link className="mr-1 h-4 w-4" /> Copy Link
+          <Link className="mr-1 h-4 w-4" />
         </Button>
         {copied && (
           <span className="absolute top-full mt-1 left-1/2 transform -translate-x-1/2 text-xs text-white font-sm bg-gray-800/90 px-2 py-1 rounded">
