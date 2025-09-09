@@ -204,7 +204,7 @@ Synthia integrates Google Custom Search for web results, Gemini AI for summariza
 ### Setup Instructions
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/yourusername/synthia.git
+   git clone https://github.com/sakshamagarwalm2/synthia.git
    cd synthia
    ```
 
@@ -410,4 +410,4 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 
 ## Contact
 
-For questions or feedback, contact [your-email@example.com] or open an issue on GitHub.
+For questions or feedback, contact [sakshamagarwalm2@gmail.com] or open an issue on GitHub.
