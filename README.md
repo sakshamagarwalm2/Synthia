@@ -2,8 +2,9 @@
 
 **Synthia**: A blend of "synthesis" and "AI," Synthia is an AI-powered browser application designed to provide intelligent, user-friendly search and research capabilities. It synthesizes information from web searches, delivers AI-generated summaries, and organizes results into an intuitive interface. Synthia combines modern web technologies with a robust backend to offer a seamless experience for users seeking information on diverse topics.
 
-![video](https://github.com/sakshamagarwalm2/Synthia/blob/main/Synthia.mp4)
-
+<video src="https://github.com/sakshamagarwalm2/Synthia/blob/main/Synthia.mp4" width="720" height="480" controls>
+  Your browser does not support the video tag.
+</video>
 ---
 
 ## Table of Contents
