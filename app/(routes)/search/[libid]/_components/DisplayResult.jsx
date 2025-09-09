@@ -305,7 +305,6 @@ function DisplayResult({ searchInputRecord }) {
           </div>
         </div>
       )}
-      <hr className="my-20" />
     </div>
   );
 }

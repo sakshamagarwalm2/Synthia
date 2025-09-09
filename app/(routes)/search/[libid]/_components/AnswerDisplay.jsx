@@ -47,7 +47,7 @@ function AnswerDisplay({ results, searchInputRecord, currentChat }) {
                 <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                     <div className="flex items-center">
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-600 mr-3"></div>
-                        <p className="text-yellow-800">AI response is being generated...</p>
+                        <p className="text-yellow-800">Searching... AI response is being generated...</p>
                     </div>
                 </div>
             )}

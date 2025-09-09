@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import {
   Atom,
@@ -11,33 +11,28 @@ import {
   Mic,
   Search,
   SendHorizonal,
-  Loader2,
+  Loader2, // Add this import for loading icon
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../../components/ui/dropdown-menu";
 import { supabase } from "../../Services/supabase";
+
 import { useUser } from "@clerk/nextjs";
 import { Button } from "../../components/ui/button";
 import { useRouter } from "next/navigation";
 
 function ChatInputBox() {
   const libid = crypto.randomUUID();
-  const [userSearchInput, setUserSearchInput] = useState("");
+
+  const [userSearchInput, setUserSearchInput] = useState();
   const [searchType, setSearchType] = useState("search");
   const { user } = useUser();
+
   const [loading, setLoading] = useState(false);
 
   const [isRecording, setIsRecording] = useState(false);
   const recognitionRef = useRef(null);
   const manuallyStoppedRef = useRef(false); // ✅ prevent auto-restart when clicked stop
 
-  const router = useRouter();
+  const router=useRouter();
 
   // ---------------------- SPEECH RECOGNITION ----------------------
   useEffect(() => {
@@ -113,12 +108,12 @@ function ChatInputBox() {
       recognitionRef.current.start();
     }
   };
+  // ---------------------- END SPEECH RECOGNITION ----------------------
 
-  // ---------------------- SEARCH HANDLER ----------------------
+
   const onSearchQuery = async () => {
     setLoading(true);
-
-    await supabase
+    const result = await supabase
       .from("Librery")
       .insert([
         {
@@ -129,12 +124,11 @@ function ChatInputBox() {
         },
       ])
       .select();
-
     setLoading(false);
+
     router.push(`/search/${libid}`);
   };
 
-  // ---------------------- RENDER ----------------------
   return (
     <div className="flex justify-center items-center w-full h-full flex-col">
       <div className="flex justify-evenly items-center">
@@ -143,7 +137,6 @@ function ChatInputBox() {
           SYNTHIA
         </h1>
       </div>
-
       <div className="p-2 w-full max-w-2xl border rounded-2xl relative mt-10">
         <Tabs defaultValue="account" className="w-full">
           <TabsContent value="account">
@@ -201,14 +194,13 @@ function ChatInputBox() {
             <TabsTrigger
               value="password"
               className={"text-primary"}
-              onClick={() => setSearchType("research")}
+              OnClick={() => setSearchType("research")}
             >
               <Atom />
               Research
             </TabsTrigger>
           </TabsList>
         </Tabs>
-
         <div className="absolute right-4 bottom-3 flex gap-2 justify-center items-center">
           {/* 🎤 MIC BUTTON with animation */}
           <Button
