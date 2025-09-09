@@ -22,7 +22,6 @@ import {
   DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu";
 import { supabase } from "../../Services/supabase";
-import { AIModelsOption } from "../../Services/Shared";
 import { useUser } from "@clerk/nextjs";
 import { Button } from "../../components/ui/button";
 import { useRouter } from "next/navigation";
@@ -211,33 +210,6 @@ function ChatInputBox() {
         </Tabs>
 
         <div className="absolute right-4 bottom-3 flex gap-2 justify-center items-center">
-          {/* MODEL SELECT */}
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Button
-                variant={Ghost}
-                className={
-                  "border border-transparent border-solid hover:border-amber-950 rounded-full"
-                }
-              >
-                <Cpu className="text-gray-500 h-5 w-5 cursor-pointer hover:text-gray-700" />
-              </Button>
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent>
-              <DropdownMenuLabel>Select Model</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {AIModelsOption.map((model, index) => (
-                <DropdownMenuItem key={index}>
-                  <div>
-                    <h2 className="mb-1 text-sm">{model.name}</h2>
-                    <p className="text-xs">{model.desc}</p>
-                  </div>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
           {/* 🎤 MIC BUTTON with animation */}
           <Button
             variant={Ghost}
