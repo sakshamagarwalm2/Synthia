@@ -18,7 +18,7 @@ function CreditPopup({ onClose, onBuy }) {
         <div className="p-6">
           <h2 className="text-4xl font-extrabold text-emerald-700 uppercase mb-2">Insufficient Credits</h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            You don’t have enough credits to perform this action.
+            You don’t have enough credits to perform this action. *This App is a demo
           </p>
 
           <div className="dark:bg-gray-700 p-4 rounded-lg text-center mb-6">
@@ -26,7 +26,7 @@ function CreditPopup({ onClose, onBuy }) {
             <p className="text-3xl font-bold text-primary dark:text-yellow-400">
               $50
             </p>
-            <p className="text-sm text-black dark:text-gray-400">for 10,000 credits</p>
+            <p className="text-sm text-black dark:text-gray-400">for 5,000 credits</p>
           </div>
 
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">

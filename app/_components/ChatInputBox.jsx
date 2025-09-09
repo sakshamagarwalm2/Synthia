@@ -178,15 +178,23 @@ function ChatInputBox() {
   };
 
   const handleBuyCredits = async () => {
+  // Step 1: Open UPI payment app
+  window.location.href = "upi://pay?pa=9216778386@ptyes&pn=Saksham%20Agarwal&am=5000&cu=INR";
+
+  // Step 2: Ask user to confirm after payment
+  const confirmed = confirm("Did you complete the payment of ₹5000? This App is just a demo.");
+
+  if (confirmed) {
     const { data, error } = await supabase
       .from("Users")
-      .update({ credits: userDetail.credits + 10000 })
+      .update({ credits: userDetail.credits + 5000 }) // add credits
       .eq("email", userDetail.email)
       .select();
 
     if (!error && data[0]) setUserDetail(data[0]);
     setShowCreditPopup(false);
-  };
+  }
+};
 
   return (
     <div className="flex flex-col justify-center items-center w-full h-full px-4 sm:px-6 md:px-10">
