@@ -32,9 +32,10 @@ function SearchQueryResult() {
 
       if (Librery && Librery.length > 0) {
         setSearchInputRecord(Librery[0]);
-      } else {
-        console.log("No record found for libid:", libid);
-      }
+      } 
+      // else {
+        // console.log("No record found for libid:", libid);
+      // }
     } catch (err) {
       console.error("Error fetching record:", err);
     }

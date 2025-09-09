@@ -34,7 +34,7 @@ export function Provider({ children }) {
       setUserDetail(data[0]);
       return;
     }
-    console.log(Users);
+    // console.log(Users);
     setUserDetail(Users[0]);
   };
 

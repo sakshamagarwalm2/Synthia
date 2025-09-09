@@ -67,7 +67,7 @@ function DisplayResult({ searchInputRecord }) {
       }
       const dataResult = await response.json();
       setSearchResults(dataResult);
-      console.log("Search API Result:", dataResult);
+      // console.log("Search API Result:", dataResult);
 
       const formattedSearchResp = dataResult?.items?.map((item) => ({
         title: item?.title,
@@ -77,7 +77,7 @@ function DisplayResult({ searchInputRecord }) {
         image: item?.pagemap?.cse_image?.[0]?.src,
       }));
 
-      console.log("Formatted search response:", formattedSearchResp);
+      // console.log("Formatted search response:", formattedSearchResp);
 
       const { data, error } = await supabase
         .from("Chats")
@@ -95,7 +95,7 @@ function DisplayResult({ searchInputRecord }) {
         throw new Error(error.message);
       }
 
-      console.log("Inserted search results:", data, "dataid:", data[0].id);
+      // console.log("Inserted search results:", data, "dataid:", data[0].id);
 
       if (data && data[0]) {
         await GenerateAIResp(formattedSearchResp, data[0].id);
@@ -117,16 +117,16 @@ function DisplayResult({ searchInputRecord }) {
       });
 
       const runId = result.data;
-      console.log("AI generation initiated, runId:", runId, result);
+      // console.log("AI generation initiated, runId:", runId, result);
 
-      console.log("Inngest function triggered, runId:", runId, result);
+      // console.log("Inngest function triggered, runId:", runId, result);
       if (!runId || typeof runId !== "string") {
         console.error("Invalid runId received:", runId);
         await GetSearchRecords(); // Fallback
         return;
       }
 
-      console.log("Polling with runId:", runId);
+      // console.log("Polling with runId:", runId);
       const interval = setInterval(async () => {
         try {
           const runResp = await axios.post("/api/get-inngest-status", {

@@ -148,7 +148,7 @@ function ChatInputBox() {
         return;
       }
     }
-    console.log("Search Input:", user);
+    // console.log("Search Input:", user);
 
     if (!userSearchInput) {
       return;
