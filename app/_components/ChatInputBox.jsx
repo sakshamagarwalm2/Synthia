@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { supabase } from "../../Services/supabase";
 
-import { useUser } from "@clerk/nextjs"; // useUser is crucial here
+import { SignUpButton, useUser } from "@clerk/nextjs"; // useUser is crucial here
 import { Button } from "../../components/ui/button";
 import { useContext } from "react";
 import { UserDetailContext } from "../../context/UserDetailContext";
@@ -33,6 +33,8 @@ function ChatInputBox() {
   const { userDetail, setUserDetail } = useContext(UserDetailContext);
   const [showCreditPopup, setShowCreditPopup] = useState(false);
 
+  const [showSignInPopup, setShowSignInPopup] = useState(false);
+
   const [userSearchInput, setUserSearchInput] = useState();
   const [searchType, setSearchType] = useState("search");
   const { user, isLoaded } = useUser(); // Get both user and isLoaded
@@ -44,6 +46,15 @@ function ChatInputBox() {
   const manuallyStoppedRef = useRef(false);
 
   const router = useRouter();
+
+  // Load hasSearched from localStorage on mount
+  const [hasSearched, setHasSearched] = useState(false);
+  useEffect(() => {
+    const stored = localStorage.getItem('hasSearched');
+    if (stored === 'true') {
+      setHasSearched(true);
+    }
+  }, []);
 
   // ---------------------- SPEECH RECOGNITION ----------------------
   useEffect(() => {
@@ -122,6 +133,15 @@ function ChatInputBox() {
   // ---------------------- END SPEECH RECOGNITION ----------------------
 
   const onSearchQuery = async () => {
+
+    // Guest limit check
+    if (!user && hasSearched) {
+      console.log("Guest user has already searched once.");
+      router.push('/sign-in');
+      return;
+    }
+
+
     if (user && userDetail !== undefined) {
       if (userDetail.credits < 1000) {
         setShowCreditPopup(true);
@@ -168,7 +188,16 @@ function ChatInputBox() {
         if (insertError) {
           throw new Error("Failed to log search query.");
         }
+
+        // Set hasSearched for guests after successful search
+      if (!user) {
+        localStorage.setItem('hasSearched', 'true');
+        setHasSearched(true);
+        console.log("Set hasSearched to true for guest user");
+      }
+
       router.push(`/search/${libid}`);
+      
     } catch (error) {
       console.error("Search query failed:", error.message);
     } finally {
